@@ -10,46 +10,38 @@ enable_language( C CXX  )
 
 
 option( PM_SKIP_CONAN_INSTALL "Prevent CMake from calling conan install" OFF )
+option( PM_BUILD_MISSING_CONAN_PACKAGES "Build conan packages that have not prebuilt binaries on the server available" OFF)
 
 if( NOT COMMAND remote_include )
-    macro( remote_include file_name url fallback_url )
+    macro( remote_include file_name current_url )
         if( NOT EXISTS "${CMAKE_BINARY_DIR}/${file_name}" )
             set( download_succeeded FALSE )
-            foreach( current_url ${url} ${fallback_url} )
-                set( download_attempt 1 )
-                set( sleep_seconds 1 )
-                while( NOT ${download_succeeded} AND ${download_attempt} LESS_EQUAL 3 )
-                    message( STATUS "Downloading pm_conan_build.cmake from ${current_url}. Attempt #${download_attempt}" )
-                    file(
-                        DOWNLOAD
-                            "${current_url}"
-                            "${CMAKE_BINARY_DIR}/${file_name}"
-                        SHOW_PROGRESS
-                        TIMEOUT
-                            2  # 2 seconds timeout
-                        STATUS
-                            download_status
-                    )
-                    list( GET download_status 0 error_status      )
-                    list( GET download_status 1 error_description )
-                    if ( error_status EQUAL 0 )
-                        set( download_succeeded TRUE )
-                    else()
-                        message( STATUS "Download failed due to error: [code: ${error_status}] ${error_description}" )
-                        math( EXPR download_attempt "${download_attempt} + 1" OUTPUT_FORMAT DECIMAL )
-                        math( EXPR sleep_seconds "${sleep_seconds} + 1" OUTPUT_FORMAT DECIMAL )
-                        message( STATUS "Sleep ${sleep_seconds} seconds" )
-                        execute_process( COMMAND "${CMAKE_COMMAND}" -E sleep "${sleep_seconds}" )
-                    endif()
-                endwhile()
-                if ( ${download_succeeded} )
-                    # break the foreach loop
-                    break()
+            set( download_attempt 1 )
+            set( sleep_seconds 1 )
+            while( NOT ${download_succeeded} AND ${download_attempt} LESS_EQUAL 3 )
+                message( STATUS "Downloading pm_conan_build.cmake from ${current_url}. Attempt #${download_attempt}" )
+                file(
+                    DOWNLOAD
+                        "${current_url}"
+                        "${CMAKE_BINARY_DIR}/${file_name}"
+                    SHOW_PROGRESS
+                    TIMEOUT
+                        2  # 2 seconds timeout
+                    STATUS
+                        download_status
+                )
+                list( GET download_status 0 error_status      )
+                list( GET download_status 1 error_description )
+                if ( error_status EQUAL 0 )
+                    set( download_succeeded TRUE )
                 else()
-                    # remove empty file
-                    file( REMOVE "${CMAKE_BINARY_DIR}/${file_name}" )
+                    message( STATUS "Download failed due to error: [code: ${error_status}] ${error_description}" )
+                    math( EXPR download_attempt "${download_attempt} + 1" OUTPUT_FORMAT DECIMAL )
+                    math( EXPR sleep_seconds "${sleep_seconds} + 1" OUTPUT_FORMAT DECIMAL )
+                    message( STATUS "Sleep ${sleep_seconds} seconds" )
+                    execute_process( COMMAND "${CMAKE_COMMAND}" -E sleep "${sleep_seconds}" )
                 endif()
-            endforeach()
+            endwhile()
             if ( NOT ${download_succeeded} )
                 # remove empty file
                 file( REMOVE "${CMAKE_BINARY_DIR}/${file_name}" )
@@ -83,7 +75,7 @@ else() # in user space and user has not performed conan install command
         set( CMAKE_BUILD_TYPE Release )
     endif()
 
-    remote_include( "conan.cmake" "http://raw.githubusercontent.com/microblink/cmake-conan/v0.15.1/conan.cmake" "http://files.microblink.com/conan.cmake" )
+    remote_include( "conan.cmake" "http://raw.githubusercontent.com/photomath/cmake-conan/v0.15/conan.cmake")
 
     set( conan_cmake_run_params BASIC_SETUP CMAKE_TARGETS )
     if( IOS )
@@ -128,6 +120,10 @@ else() # in user space and user has not performed conan install command
         message( FATAL_ERROR "Cannot find neither conanfile.py nor conanfile.txt in current source directory. You can also use CONANFILE_LOCATION to specify path to either conanfile.py or conanfile.txt and override automatic detection." )
     endif()
 
+    if (PM_BUILD_MISSING_CONAN_PACKAGES)
+        list(APPEND conan_cmake_run_params BUILD missing)
+    endif()
+    
     conan_cmake_run( CONANFILE ${CONANFILE} ${conan_cmake_run_params} )
 
     if ( CONAN_CMAKE_MULTI )
@@ -139,6 +135,6 @@ else() # in user space and user has not performed conan install command
 endif()
 
 # if this include fails, then you have forgot to add
-# build_requires = "CMakeBuild/<latest-version>@microblink/stable"
+# build_requires = "cmake-common/<latest-version>@core/master"
 # to your conanfile.py
 include( common )
