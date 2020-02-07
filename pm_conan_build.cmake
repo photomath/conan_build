@@ -5,10 +5,6 @@ cmake_policy( SET CMP0025 NEW )
 
 enable_language( C CXX  )
 
-
-
-
-
 option( PM_SKIP_CONAN_INSTALL "Prevent CMake from calling conan install" OFF )
 option( PM_BUILD_MISSING_CONAN_PACKAGES "Build conan packages that have not prebuilt binaries on the server available" OFF)
 
@@ -86,6 +82,9 @@ else() # in user space and user has not performed conan install command
     set( HAVE_PROFILE OFF )
     if( IOS )
         list( APPEND conan_cmake_run_params PROFILE ios-clang)
+        set( HAVE_PROFILE ON )
+    elseif(ANDROID)
+        list( APPEND conan_cmake_run_params PROFILE android-${ANDROID_ABI})
         set( HAVE_PROFILE ON )
     elseif( CMAKE_SYSTEM_NAME STREQUAL "Linux" )
         list( APPEND conan_cmake_run_params PROFILE linux-clang)
