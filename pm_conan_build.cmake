@@ -132,3 +132,8 @@ else() # in user space and user has not performed conan install command
         set(CMAKE_MODULE_PATH ${CONAN_CMAKE_MODULE_PATH_RELEASE} ${CMAKE_MODULE_PATH})
     endif()
 endif()
+
+# if this include fails, then you have forgot to add
+# build_requires = "cmake-common/<latest-version>@core/master"
+# to your conanfile.py
+include( common )
