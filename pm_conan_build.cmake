@@ -138,6 +138,7 @@ if (CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
     message(STATUS "ccache found: ${CCACHE_PROGRAM}")
 else()
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "")
     message(STATUS "ccache not found")
 endif()
 
