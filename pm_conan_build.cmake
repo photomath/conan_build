@@ -123,7 +123,7 @@ else() # in user space and user has not performed conan install command
         list(APPEND conan_cmake_run_params BUILD missing)
     endif()
 
-    conan_cmake_run( CONANFILE ${CONANFILE} ${conan_cmake_run_params} -u )
+    conan_cmake_run( CONANFILE ${CONANFILE} ${conan_cmake_run_params} UPDATE )
 
     if ( CONAN_CMAKE_MULTI )
         # workaround for https://github.com/conan-io/conan/issues/1498
