@@ -90,7 +90,11 @@ else() # in user space and user has not performed conan install command
         list( APPEND conan_cmake_run_params PROFILE linux-clang)
         set( HAVE_PROFILE ON )
     elseif( CMAKE_SYSTEM_NAME STREQUAL "Darwin" )
-        list( APPEND conan_cmake_run_params PROFILE mac-clang)
+        if ( CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" )
+            list( APPEND conan_cmake_run_params PROFILE mac-m1-arm-clang)
+        else()
+            list( APPEND conan_cmake_run_params PROFILE mac-clang)
+        endif()
         set( HAVE_PROFILE ON )
     endif()
 
