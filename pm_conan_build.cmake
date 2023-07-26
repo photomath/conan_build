@@ -71,7 +71,7 @@ else() # in user space and user has not performed conan install command
         set( CMAKE_BUILD_TYPE Release )
     endif()
 
-    remote_include( "conan.cmake" "http://raw.githubusercontent.com/photomath/cmake-conan/v0.15/conan.cmake")
+    remote_include( "conan.cmake" "http://raw.githubusercontent.com/photomath/cmake-conan/master/conan.cmake")
 
     set( conan_cmake_run_params BASIC_SETUP CMAKE_TARGETS )
     if( IOS )
